@@ -57,7 +57,7 @@ ENV TOOLS=/tools
 ENV DATA=/data
 ENV TOOL=/tool
 ENV YUM_INSTALL="java-1.8.0 zlib-devel zlib zlib2-devel zlib2 bzip2-devel bzip2 lzma-devel lzma xz-devel xz ncurses-devel wget gcc gcc-c++ make perl perl-Switch perl-Digest-MD5 perl-Data-Dumper bc"
-ENV YUM_REMOVE="zlib-devel zlib2-devel bzip2-devel lzma-devel xz-devel ncurses-devel wget gcc gcc-c++"
+ENV YUM_REMOVE="zlib-devel bzip2-devel xz-devel ncurses-devel wget gcc gcc-c++"
 
 
 

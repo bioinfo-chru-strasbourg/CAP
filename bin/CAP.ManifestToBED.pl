@@ -96,7 +96,7 @@ Configuration file for main parameters (default 'config.ini')
 Configuration file for annotation parameters (default 'config.annotation.ini').
 
 =back
-	
+
 =cut
 
 =head2 OTHER OPTIONS
@@ -114,7 +114,7 @@ Type of manifest ("TruSeq", "PCR"..., default=auto) TODO
 Type of output ("primer", "amplicon", "region_clipped", "target" or "region", default="primer")
 
 =back
-	
+
 =cut
 
 
@@ -124,7 +124,7 @@ Type of output ("primer", "amplicon", "region_clipped", "target" or "region", de
 ## Parameters default values
 
 our %parameters = ( #
-	# Main options 
+	# Main options
 	'help'		=>  	0,	# Help parameter
 	'man'		=>  	0,	# Man parameter
 	'release'	=>  	0,	# Release parameter
@@ -192,7 +192,7 @@ if ($parameters{"man"}) {
 if ($parameters{"release"}) {
 	print "## Script Information\n";
 	while ((my $var, $val) = each(%information)){
-		print "# $var: $val\n";	
+		print "# $var: $val\n";
 	};#while
 	exit 0;
 };#if
@@ -221,7 +221,7 @@ if (-e $parameters{"config"}) {
 
 # Set parameters from config file
 if (-e $config_file) {
-	
+
 	# read ini file
 	our %config=read_ini($config_file);
 	# Folders
@@ -232,26 +232,26 @@ if (-e $config_file) {
 	if (defined $config{"folders"}{"annovar_folder"} && -d $config{"folders"}{"annovar_folder"}) {
 		$annovar_folder=$config{"folders"}{"annovar_folder"};
 	} else {
-		$annovar_folder=$basename;    
+		$annovar_folder=$basename;
 	};#if
 	if (trim($annovar_folder) ne "") {$annovar_folder.="/"};
 
 	# VCFTOOLS folder in $PATH by default (default "")
 	if ((defined $config{"folders"}{"vcftools_folder"} && -d $config{"folders"}{"vcftools_folder"}) || trim($config{"folders"}{"vcftools_folder"}) eq "") {
-		$vcftools_folder=$config{"folders"}{"vcftools_folder"};    
+		$vcftools_folder=$config{"folders"}{"vcftools_folder"};
 	} else {
-		$vcftools_folder=$basename;    
+		$vcftools_folder=$basename;
 	};#if
 	if (trim($vcftools_folder) ne "") {$vcftools_folder.="/"};
 
 	# R folder in $PATH by default (default "")
 	if ((defined $config{"folders"}{"R_folder"} && -d $config{"folders"}{"R_folder"}) || trim($config{"folders"}{"R_folder"}) eq "") {
-		$R_folder=$config{"folders"}{"R_folder"};    
+		$R_folder=$config{"folders"}{"R_folder"};
 	} else {
-		$R_folder=$basename;    
+		$R_folder=$basename;
 	};#if
 	if (trim($R_folder) ne "") {$R_folder.="/"};
-	
+
 	# Database connexion
 	$host = $config{"database"}{"host"};
 	$driver = $config{"database"}{"driver"};
@@ -321,14 +321,14 @@ if (in_array(\@type_allowed,uc($manifest_type))) {
 	$manifest_type=uc($manifest_type);
 	# Check Manifest type
 	$manifest_type_checked=manifest_type_test($input_file);
-	
+
 	if ($manifest_type eq uc($manifest_type_checked)) {
 		#print "$manifest_type  $manifest_type_checked\n" if $DEBUG;
 	} else {
 		if (in_array(\@type_allowed,uc($manifest_type_checked))) {
 			# Replace input manifest type by the good one
 			print "# WARNING: Manifest file type is '$manifest_type_checked', not '$manifest_type'\n";
-			$manifest_type=uc($manifest_type_checked);	
+			$manifest_type=uc($manifest_type_checked);
 		} else {
 			# manifest type checked as 'unknown', but input manifest typ edifferent. Keep input manifest type!
 		};#if
@@ -350,12 +350,12 @@ if (in_array(\@type_allowed,uc($manifest_type))) {
 ## Test manifest type
 sub manifest_type_test {
 ## INPUT:
-## $_[0]: manifest file   	
+## $_[0]: manifest file
 ## OUTPUT
 ## $manifest_type: Manifest type
 
 	my $manifest_file=$_[0];	# Manifest file
-	my $manifest_type;		# Manifest type	
+	my $manifest_type;		# Manifest type
 
 	open(FILE_INPUT, $manifest_file) || die "Problem to open the file '$manifest_file': $!";
 	my $line=0;
@@ -386,7 +386,7 @@ sub manifest_type_test {
 		};#if
 
 
-	};#while	
+	};#while
 
 	if (!defined $manifest_type) {
 		$manifest_type="unknown";
@@ -425,7 +425,7 @@ $output="";
 ## VCF into ANNOVAR
 
 # ANNOVAR temporary file
-my $tmp_file=tmpnam(); 
+my $tmp_file=tmpnam();
 
 # ANNOVAR convert command
 #my $cmd="perl $convert2annovar --format vcf4old --includeinfo --allallele --outfile $annovar_file $input_file 2>&1";
@@ -453,9 +453,9 @@ while(<FILE_INPUT>) {
 	chomp; #delete \n character
 	$line++;
 	my $line_content=$_;
-	
 
-	# Null line	
+
+	# Null line
 	if (trim($line_content) eq "") {
 		next;
 	};
@@ -463,24 +463,24 @@ while(<FILE_INPUT>) {
 	@line_content_split=split("\t",$line_content);
 
 	#print "@line_content_split\n" if $DEBUG;
-	
+
 	# Section
 	if ($line_content_split[0] =~ /\[(.*)\]/) {
 		$section=$1;
 	};#if
 
-	# Process	
+	# Process
 	switch (uc($manifest_type)){
 		# Manifest type PCR
 		case("PCR") {
 			if ($section eq "Regions") {
 				#print "$line_content\n" if $DEBUG;
 				#print "@line_content_split\n" if $DEBUG;
-				#EGFR_ex19 chr7 55242379 55242574 30 30 
+				#EGFR_ex19 chr7 55242379 55242574 30 30
 				#if ($line_content  =~ /(\w+)\t(\w+)\t(\d+)\t(\d+)\t(\d+)\t(\d+)/) {
 				if ($line_content  =~ /(.+)\t(\w+)\t(\d+)\t(\d+)\t(\d+)\t(\d+)/) {
 					#print "!!!Match $1 $2 $3 $4 $5 $6\n" if $DEBUG;
-					my $sequence_name=$1;					
+					my $sequence_name=$1;
 					my $chr=$2;
 					my $start=$3;
 					my $stop=$4;
@@ -510,7 +510,7 @@ while(<FILE_INPUT>) {
 					$BEDcontent_target.="$chr\t$start_clipped\t$stop_clipped\t+\t$sequence_name\t$primer1_sequence\t$primer2_sequence\t$chr:$start-$stop\n";
 				} elsif ($line_content  =~ /(.+)\t(\w+)\t(\d+)\t(\d+)/) { # in case of no primer defined
 					#print "!!!Match $1 $2 $3 $4\n" if $DEBUG;
-					my $sequence_name=$1;					
+					my $sequence_name=$1;
 					my $chr=$2;
 					my $start=$3;
 					my $stop=$4;
@@ -543,7 +543,7 @@ while(<FILE_INPUT>) {
 						$regions{$line_content_split[$amplicon_probes_col_indexes{"Target Region ID"}]}{$col_name}=$line_content_split[$col_index];
 					};#while
 				};#if
-				
+
 			};#if
 			# Section Targets
 			if ($section eq "Targets") {
@@ -557,7 +557,7 @@ while(<FILE_INPUT>) {
 						#print "$col_name)}=$col_index\n" if $DEBUG;
 						$col_index++;
 					};#foreach
-					
+
 				} else {
 					# Probes lines
 					#print $line_content_split[3]."\n" if $DEBUG;
@@ -572,7 +572,7 @@ while(<FILE_INPUT>) {
 						};#while
 					};#if
 				};#if
-				
+
 			};#if
 
 
@@ -585,7 +585,7 @@ while(<FILE_INPUT>) {
 	}
 
 
-	
+
 
 };#while
 
@@ -629,7 +629,7 @@ if (uc($manifest_type) eq "TRUSEQ") {
 				# Translate sequences
 				$primer1_sequence_bis=~ tr/ATGC/TACG/;
 				$primer2_sequence_bis=~ tr/ATGC/TACG/;
-				# Reverse sequences 
+				# Reverse sequences
 				$primer1_sequence_bis=scalar reverse $primer1_sequence_bis;
 				$primer2_sequence_bis=scalar reverse $primer2_sequence_bis;
 				# Assign
@@ -667,7 +667,7 @@ if (uc($manifest_type) eq "TRUSEQ") {
 			$BEDcontent_region.="$chr\t$start\t$stop\t$regionID\t$TargetRegionName\n";
 			#$BEDcontent_region_clipped.="$chr\t$start\t$stop\t$regionID\t$TargetRegionName\n";
 		};#while
-		
+
 	};#if
 };#if
 
@@ -697,7 +697,7 @@ switch (lc($output_type)){
 		print FILE_OUTPUT "$BEDcontent_target";
 	}
 };#switch
-		
+
 close(FILE_OUTPUT);
 
 
@@ -719,4 +719,3 @@ print $output;
 
 
 __END__
-

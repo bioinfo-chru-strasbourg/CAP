@@ -96,7 +96,7 @@ Configuration file for main parameters (default 'config.ini')
 Configuration file for annotation parameters (default 'config.annotation.ini').
 
 =back
-	
+
 =cut
 
 =head2 OTHER OPTIONS
@@ -108,7 +108,7 @@ Configuration file for annotation parameters (default 'config.annotation.ini').
 Type of manifest ("TruSeq", "XT Nextera"..., default=auto) TODO
 
 =back
-	
+
 =cut
 
 
@@ -118,7 +118,7 @@ Type of manifest ("TruSeq", "XT Nextera"..., default=auto) TODO
 ## Parameters default values
 
 our %parameters = ( #
-	# Main options 
+	# Main options
 	'help'		=>  	0,	# Help parameter
 	'man'		=>  	0,	# Man parameter
 	'release'	=>  	0,	# Release parameter
@@ -186,7 +186,7 @@ if ($parameters{"man"}) {
 if ($parameters{"release"}) {
 	print "## Script Information\n";
 	while ((my $var, $val) = each(%information)){
-		print "# $var: $val\n";	
+		print "# $var: $val\n";
 	};#while
 	exit 0;
 };#if
@@ -215,7 +215,7 @@ if (-e $parameters{"config"}) {
 
 # Set parameters from config file
 if (-e $config_file) {
-	
+
 	# read ini file
 	our %config=read_ini($config_file);
 	# Folders
@@ -226,26 +226,26 @@ if (-e $config_file) {
 	if (defined $config{"folders"}{"annovar_folder"} && -d $config{"folders"}{"annovar_folder"}) {
 		$annovar_folder=$config{"folders"}{"annovar_folder"};
 	} else {
-		$annovar_folder=$basename;    
+		$annovar_folder=$basename;
 	};#if
 	if (trim($annovar_folder) ne "") {$annovar_folder.="/"};
 
 	# VCFTOOLS folder in $PATH by default (default "")
 	if ((defined $config{"folders"}{"vcftools_folder"} && -d $config{"folders"}{"vcftools_folder"}) || trim($config{"folders"}{"vcftools_folder"}) eq "") {
-		$vcftools_folder=$config{"folders"}{"vcftools_folder"};    
+		$vcftools_folder=$config{"folders"}{"vcftools_folder"};
 	} else {
-		$vcftools_folder=$basename;    
+		$vcftools_folder=$basename;
 	};#if
 	if (trim($vcftools_folder) ne "") {$vcftools_folder.="/"};
 
 	# R folder in $PATH by default (default "")
 	if ((defined $config{"folders"}{"R_folder"} && -d $config{"folders"}{"R_folder"}) || trim($config{"folders"}{"R_folder"}) eq "") {
-		$R_folder=$config{"folders"}{"R_folder"};    
+		$R_folder=$config{"folders"}{"R_folder"};
 	} else {
-		$R_folder=$basename;    
+		$R_folder=$basename;
 	};#if
 	if (trim($R_folder) ne "") {$R_folder.="/"};
-	
+
 	# Database connexion
 	$host = $config{"database"}{"host"};
 	$driver = $config{"database"}{"driver"};
@@ -356,7 +356,7 @@ $output="";
 ## VCF into ANNOVAR
 
 # ANNOVAR temporary file
-my $tmp_file=tmpnam(); 
+my $tmp_file=tmpnam();
 
 # ANNOVAR convert command
 my $cmd="perl $convert2annovar --format vcf4old --includeinfo --allallele --outfile $annovar_file $input_file 2>&1";
@@ -381,14 +381,14 @@ while(<FILE_INPUT>) {
 	my $line++;
 	my $line_content=$_;
 
-	# Null line	
+	# Null line
 	if (trim($line_content) eq "") {
 		next;
 	};
 
 	my @line_content_split=split("\t",$line_content);
-	
-	# Process	
+
+	# Process
 	#print "@line_content_split\n" if $DEBUG;
 	if ($line_content  =~ /(\w+)\t(\d+)\t(\d+)\t\+\t(.*)\t(.*)/) {
 		#print "!!!Match $1 $2 $3 $4 $5\n" if $DEBUG;
@@ -406,7 +406,7 @@ while(<FILE_INPUT>) {
 		#$BEDcontent.="$primer1_chr\t$primer1_start\t$primer1_stop\t+\t$chr:$start-$stop\tForward\n";
 		#$BEDcontent.="$primer2_chr\t$primer2_start\t$primer2_stop\t+\t$chr:$start-$stop\tReverse\n";
 	};#if
-	
+
 
 };#while
 
@@ -420,14 +420,14 @@ while(<FILE_FASTA>) {
 	my $line++;
 	my $line_content=$_;
 
-	# Null line	
+	# Null line
 	if (trim($line_content) eq "") {
 		next;
 	};
 
 	my @line_content_split=split("\t",$line_content);
-	
-	# Process	
+
+	# Process
 	#print "@line_content_split\n" if $DEBUG;
 	if ($line_content  =~ />(.*)/) {
 		#print "!!!Match SEQNAME $1\n" if $DEBUG;
@@ -439,7 +439,7 @@ while(<FILE_FASTA>) {
 			#print "$SEQ_NAME=$SEQ\n" if $DEBUG;
 		};#if
 	};#if
-	
+
 
 };#while
 
@@ -478,4 +478,3 @@ print $output;
 
 
 __END__
-
