@@ -1,0 +1,60 @@
+#######################################
+# CAP [0.9.0b-07/08/2019]
+# Clipping Amplicon Primers
+# Antony Le Bechec @ IRC © GNU-GPL
+#######################################
+
+CAP (Clipping Amplicon Primer) clips amplicon primers by identifying the most probable amplicon for each reads.
+Amplicon primer clipping reduces sequencing noise and variant allele frequency calculation errors.
+CAP also generates coverage metrics for each Amplicon.
+
+
+################
+# Requirements #
+################
+# Reference genome (e.g. hg19.fa)
+# PICARD >=2.18.5
+# SAMTOOLS >=1.8
+# BEDTOOLS >=2.27.1
+# JAVA >=1.8
+
+
+########
+# HELP #
+########
+
+# USAGE: CAP --function=<FUNCTION> --bam=<BAM> --manifest=<MANIFEST> --output=<OUTPUT> [options...]
+# -b/--bam                      Aligned SAM/BAM file (mandatory)
+# -m/--manifest                 MANIFEST file (mandatory)
+# -o/--output                   Output file, either Clipped Aligned BAM file (defaut *clipped.bam) or Coverage file (defaut BAM.coverage)
+# -r/--ref                      REFerence genome
+# -e/--env                      ENVironment file
+# -k/--unclipped                Indicates if the BAM file is NOT clipped (yet) (default: 0/FALSE, means that the BAM IS clipped)
+# -g/--clip_overlapping_reads   Clip overlapping reads from PICARD.
+# -c/--chr                      Filter reads on chromosome (defaut all reads)
+# -q/--clipping_mode            Clipping mode, either 'O' for SoftClipping or 'Q' for SoftClipping and Q0 (default 'O')
+# -a/--clipping_options         Clipping options
+# -t/--tmp                      Temporary folder option (default /tmp)
+# -u/--threads                  number of threads for multithreading and samtools option (default 1)
+# -z/--compress                 compress level samtools option, from 0 to 9 (default 0)
+# -p/--picard                   PICARD JAR (disabled if ENV)
+# -s/--samtools                 SAMTOOLS (disabled if ENV)
+# -l/--bedtools                 BEDTOOLS (disabled if ENV)
+# -j/--java                     JAVA (disabled if ENV, default 'java')
+# -v/--verbose                  VERBOSE option
+# -d/--debug                    DEBUG option
+# -n/--release                  RELEASE option
+# -h/--help                     HELP option
+
+
+#################
+# Usage example #
+#################
+
+# Clipping
+./CAP --function=clipping --bam=examples/sample.aligned.unclipped.bam --output=examples/sample.aligned.clipped.bam --manifest=examples/sample.manifest
+# Coverage
+./CAP --function=coverage --bam=examples/sample.aligned.clipped.bam --output=examples/sample.aligned.clipped.bam.coverage --manifest=examples/sample.manifest
+column -t examples/sample.aligned.clipped.bam.coverage;
+# SoftClip to Q0
+samtools view -h <BAM/SAM/CRAM> | perl ./CAP.SoftClipToQ0.pl > <SAM>;

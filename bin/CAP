@@ -1,0 +1,239 @@
+#!/bin/bash
+#################################
+##
+## NGS environment
+##
+#################################
+
+SCRIPT_NAME="CAP"
+SCRIPT_DESCRIPTION="Clipping Amplicon Primers"
+SCRIPT_RELEASE="0.9.0b"
+SCRIPT_DATE="07/08/2019"
+SCRIPT_AUTHOR="Antony Le Bechec"
+SCRIPT_COPYRIGHT="IRC"
+SCRIPT_LICENCE="GNU-GPL"
+
+# Realse note
+RELEASE_NOTES=$RELEASE_NOTES"# 0.9b-07/08/2019: Script creation\n";
+
+
+# Header
+function header () {
+	echo "#######################################";
+	echo "# $SCRIPT_NAME [$SCRIPT_RELEASE-$SCRIPT_DATE]";
+	echo "# $SCRIPT_DESCRIPTION ";
+	echo "# $SCRIPT_AUTHOR @ $SCRIPT_COPYRIGHT © $SCRIPT_LICENCE";
+	echo "#######################################";
+}
+
+# Release
+function release () {
+	echo "# RELEASE NOTES:";
+	echo -e $RELEASE_NOTES
+}
+
+# Usage
+function usage {
+
+	# USAGE
+	echo "# USAGE: CAP --function=<FUNCTION> --bam=<BAM> --manifest=<MANIFEST> --output=<OUTPUT> [options...]";
+
+	# IO
+	echo "# -b/--bam                      Aligned SAM/BAM file (mandatory)";
+	echo "# -m/--manifest                 MANIFEST file (mandatory)";
+	echo "# -o/--output                   Output file, either Clipped Aligned BAM file (defaut *clipped.bam) or Coverage file (defaut BAM.coverage)";
+	echo "# -r/--ref                      REFerence genome";
+
+	# Parameters
+	echo "# -e/--env                      ENVironment file";
+	echo "# -k/--unclipped                Indicates if the BAM file is NOT clipped (yet) (default: 0/FALSE, means that the BAM IS clipped)";
+	echo "# -g/--clip_overlapping_reads   Clip overlapping reads from PICARD.";
+	echo "# -c/--chr                      Filter reads on chromosome (defaut all reads)";
+	echo "# -q/--clipping_mode            Clipping mode, either 'O' for SoftClipping or 'Q' for SoftClipping and Q0 (default 'O')";
+	echo "# -a/--clipping_options         Clipping options";
+	echo "# -t/--tmp                      Temporary folder option (default /tmp)";
+	echo "# -u/--threads                  number of threads for multithreading and samtools option (default 1)";
+	echo "# -z/--compress                 compress level samtools option, from 0 to 9 (default 0)";
+
+	# tools
+	echo "# -p/--picard                   PICARD JAR (disabled if ENV)";
+	echo "# -s/--samtools                 SAMTOOLS (disabled if ENV) ";
+	echo "# -l/--bedtools                 BEDTOOLS (disabled if ENV)";
+	echo "# -j/--java                     JAVA (disabled if ENV, default 'java')";
+
+	# HELP/RELEASE
+	echo "# -v/--verbose                  VERBOSE option";
+	echo "# -d/--debug                    DEBUG option";
+	echo "# -n/--release                  RELEASE option";
+	echo "# -h/--help                     HELP option";
+
+	echo "#";
+}
+
+# header
+header;
+
+ARGS=$(getopt -o "f:b:m:o:r:e:kgc:q:a:t:u:z:p:s:l:j:vdnh" --long "function:,bam:,manifest:,output:,ref:,env:,unclipped,clip_overlapping_reads,chr:,clipping_mode:,clipping_options:,tmp:,threads:,compress:,picard:,samtools:,bedtools:,java:,verbose,debug,release,help" -- "$@" 2> /dev/null)
+
+
+
+#if [ $? -ne 0 ]; then
+#	echo $?
+#	usage;
+#	exit;
+#fi;
+
+
+PARAM=$@
+
+[ "$PARAM" == "" ] && usage && exit 0
+
+
+eval set -- "$ARGS"
+while true
+do
+	#echo "$1=$2"
+	#echo "Eval opts";
+	case "$1" in
+		-f|--function)
+			FUNCTION="$2";
+			shift 2
+			;;
+		-b|--bam)
+			if [ ! -e $2 ] || [ "$2" == "" ]; then
+				echo "#[ERROR] No BAM file '$2'"
+				usage; exit;
+			else
+				BAM="$2";
+			fi;
+			shift 2
+			;;
+		-m|--manifest)
+			if [ ! -e $2 ] || [ "$2" == "" ]; then
+				echo "#[ERROR] No MANIFEST file '$2'"
+				usage; exit;
+			else
+				MANIFEST_INPUT="$2";
+			fi;
+			shift 2
+			;;
+		-o|--output)
+			OUTPUT="$2"
+			shift 2
+			;;
+		-r|--ref)
+			REF_INPUT="$2"
+			shift 2
+			;;
+		-e|--env)
+			ENV="$2"
+			shift 2
+			;;
+		-k|--unclipped)
+			CLIPPED_BAM=0
+			shift 1
+			;;
+		-g|--clip_overlapping_reads)
+			CLIP_OVERLAPPING_READS=1;
+			shift 1
+			;;
+		-c|--chr)
+			CHR="$2"
+			shift 2
+			;;
+		-a|--clipping_options)
+			CLIPPING_OPTIONS="$2"
+			shift 2
+			;;
+		-q|--clipping_mode)
+			CLIPPING_MODE="$2"
+			shift 2
+			;;
+		-t|--tmp)
+			TMP_INPUT="$2"
+			shift 2
+			;;
+		-u|--threads)
+			THREADS_INPUT="$2"
+			shift 2
+			;;
+		-z|--compress)
+			COMPRESS="$2"
+			shift 2
+			;;
+		-p|--picard)
+			PICARD_INPUT="$2"
+			shift 2
+			;;
+		-s|--samtools)
+			SAMTOOLS_INPUT="$2"
+			shift 2
+			;;
+		-l|--bedtools)
+			BEDTOOLS_INPUT="$2"
+			shift 2
+			;;
+		-j|--java)
+			JAVA_INPUT="$2"
+			shift 2
+			;;
+		-v|--verbose)
+			VERBOSE=1
+			shift 1
+			;;
+		-d|--debug)
+			VERBOSE=1
+			DEBUG=1
+			shift 1
+			;;
+		-n|--release)
+			release;
+			exit 0
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		--) shift
+			break
+			;;
+		*) 	echo "# Option $1 is not recognized. " "Use -h or --help to display the help." && \
+			exit 1
+			;;
+	esac
+done
+
+
+# Script folder
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+
+# function
+if [ "$FUNCTION" != "clipping" ] && [ "$FUNCTION" != "coverage" ]; then
+	FUNCTION="clipping"
+fi;
+
+
+(($DEBUG)) && echo "#[INFO] FUNCTION: $FUNCTION"
+
+#echo $PARAM
+
+echo ""
+
+
+case "$FUNCTION" in
+	clipping)
+		#(($VERBOSE)) && echo "#[INFO] CLIPPING"
+		$SCRIPT_DIR/CAP.clipping.sh $PARAM
+		;;
+	coverage)
+		#(($VERBOSE)) && echo "#[INFO] COVERAGE"
+		$SCRIPT_DIR/CAP.coverage.sh $PARAM
+		;;
+	*) 	echo "# Option $1 is not recognized. " "Use -h or --help to display the help." && \
+		usage
+		exit 1
+		;;
+esac
+
+exit 0
