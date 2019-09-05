@@ -448,7 +448,11 @@ if (($MULTITHREADING)) && [ -e $ENV ] && [ "$ENV" != "" ]; then
 				@rm -f $P
 			" >>$MK;
 			echo "$CLIPPED_P: $P.bam
+<<<<<<< HEAD
 				@$0 $PARAM_MULTITHREADING --bam=$P.bam --manifest=$MANIFEST --output=$CLIPPED_P --env=$ENV --threads=1 --clipping_options='$CLIPPING_OPTIONS' --ref=$REF; #--verbose;
+=======
+				@$0 $PARAM_MULTITHREADING --bam=$P.bam --manifest=$MANIFEST --threads=1 --output=$CLIPPED_P --env=$ENV --clipping_options='$CLIPPING_OPTIONS' --ref=$REF; #--verbose;
+>>>>>>> 0.9.11b
 				@rm -f $P.bam
 			" >>$MK;
 			CLIPPED_LIST=$CLIPPED_LIST" $CLIPPED_P"
