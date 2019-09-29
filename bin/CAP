@@ -214,9 +214,39 @@ if [ "$FUNCTION" != "clipping" ] && [ "$FUNCTION" != "coverage" ]; then
 fi;
 
 
+# ENV
+if [ -z $ENV ] || [ ! -e $ENV ]; then
+	if [ -e $SCRIPT_DIR/env.sh ]; then
+		ENV=$SCRIPT_DIR/env.sh
+	else
+		echo "#[WARNING] No ENV defined"
+	fi;
+fi;
+if [ -e $ENV ] && [ "$ENV" != "" ]; then
+	(($VERBOSE)) && echo "#[WARNING] ENV=$ENV";
+	source $ENV
+fi;
+
+
+# TMP
+if [ ! -z $TMP_INPUT ] && [ -d $TMP_INPUT ]; then
+	TMP_SYS_FOLDER=$TMP_INPUT;
+fi;
+if [ -z $TMP_SYS_FOLDER ] || [ ! -d $TMP_SYS_FOLDER ]; then
+	TMP_SYS_FOLDER=/tmp
+	(($DEBUG)) && echo "#[WARNING] TMP=$TMP_SYS_FOLDER"
+	#usage;
+	#exit;
+fi
+TMP_CAP=$TMP_SYS_FOLDER/CAP_$RANDOM$RANDOM
+mkdir -p $TMP_CAP
+
+
 (($DEBUG)) && echo "#[INFO] FUNCTION: $FUNCTION"
 
+PARAM=$PARAM" --tmp=$TMP_CAP "
 #echo $PARAM
+
 
 echo ""
 
@@ -232,8 +262,14 @@ case "$FUNCTION" in
 		;;
 	*) 	echo "# Option $1 is not recognized. " "Use -h or --help to display the help." && \
 		usage
-		exit 1
+		#exit 1
 		;;
 esac
+
+# TMP_FILES
+if ! (($DEBUG)); then
+	#rm -Rf $TMP_FILES
+	rm -rf $TMP_CAP
+fi;
 
 exit 0
