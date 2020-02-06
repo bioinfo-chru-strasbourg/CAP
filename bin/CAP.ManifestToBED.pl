@@ -482,14 +482,14 @@ while(<FILE_INPUT>) {
 					#print "!!!Match $1 $2 $3 $4 $5 $6\n" if $DEBUG;
 					my $sequence_name=$1;
 					my $chr=$2;
-					my $start=$3;
+					my $start=($3-1);
 					my $stop=$4;
 					my $primer1_length=$5;
 					my $primer2_length=$6;
 					my $B="N"; # default base
 					# primer1 calculation
 					my $primer1_chr=$chr;
-					my $primer1_start=($start-1);
+					my $primer1_start=$start;
 					my $primer1_stop=($start+$primer1_length-1);
 					#my $primer1_sequence=s/^(.*)/(' ' x $primer1_length) . $B/e;
 					my $primer1_sequence = ( $B x $primer1_length ) . $primer1_sequence;
