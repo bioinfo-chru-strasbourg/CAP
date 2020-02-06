@@ -10,13 +10,13 @@
 
 our %information = ( #
 	'script'	=>  	$0,		# Script
-	'release'	=>  	"0.9.5b",	# Release
+	'release'	=>  	"0.9.11.1b",	# Release
 	'description'	=>  	"BED File from Illumina Manifest",	# Description
 	#'beta'		=>  	"beta",		# Man parameter
-	'date'		=>  	"20160725",	# Release parameter
+	'date'		=>  	"20200206",	# Release parameter
 	'author'	=>  	"ALB",		# Debug parameter
 	'copyright'	=>  	"IRC",		# Verbose parameter
-	'licence'	=>  	"GNU-GPL",	# Licence
+	'licence'	=>  	"GNU-AGPL",	# Licence
 );
 
 
@@ -41,7 +41,8 @@ require "functions.inc.pl";	# Common functions
 
 =head1 NAME
 
-ManifestToBED.pl - BED File from Illumina Manifest
+ManifestToBED.pl - BED File from Illumina Manifest.
+Note: Manifest file format uses 1-based coordinates, BED file format uses 0-based coordinates
 
 =head1 DESCRIPTION
 
