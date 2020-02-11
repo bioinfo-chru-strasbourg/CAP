@@ -488,10 +488,13 @@ while(<FILE_INPUT>) {
 					my $primer1_length=$5;
 					my $primer2_length=$6;
 					my $B="N"; # default base
+					my $chr_start_stop_0_based="$chr:$start-$stop";
+					my $chr_start_stop_1_based="$chr:".($start+1)."-$stop";
+					#print("$chr\t$start_clipped\t$stop_clipped\t+\t$sequence_name\n");
 					# primer1 calculation
 					my $primer1_chr=$chr;
 					my $primer1_start=$start;
-					my $primer1_stop=($start+$primer1_length-1);
+					my $primer1_stop=($start+$primer1_length);
 					#my $primer1_sequence=s/^(.*)/(' ' x $primer1_length) . $B/e;
 					my $primer1_sequence = ( $B x $primer1_length ) . $primer1_sequence;
 					# primer2 calculation
@@ -503,23 +506,23 @@ while(<FILE_INPUT>) {
 					my $start_clipped=($start+$primer1_length);
 					my $stop_clipped=($stop-$primer2_length);
 					# BED
-					$BEDcontent.="$primer1_chr\t$primer1_start\t$primer1_stop\t+\t$chr:$start-$stop\tForward\n";
-					$BEDcontent.="$primer2_chr\t$primer2_start\t$primer2_stop\t+\t$chr:$start-$stop\tReverse\n";
-					$BEDcontent_amplicon.="$chr\t$start\t$stop\t$sequence_name\t$sequence_name\n";
-					$BEDcontent_region.="$chr\t$start\t$stop\t$sequence_name\t$sequence_name\n";
-					$BEDcontent_region_clipped.="$chr\t$start_clipped\t$stop_clipped\t$sequence_name\t$sequence_name\n";
+					$BEDcontent.="$primer1_chr\t$primer1_start\t$primer1_stop\t+\t$chr_start_stop_1_based\tForward\n";
+					$BEDcontent.="$primer2_chr\t$primer2_start\t$primer2_stop\t+\t$chr_start_stop_1_based\tReverse\n";
+					$BEDcontent_amplicon.="$chr\t$start\t$stop\t+\t$sequence_name\n";
+					$BEDcontent_region.="$chr\t$start\t$stop\t+\t$sequence_name\n";
+					$BEDcontent_region_clipped.="$chr\t$start_clipped\t$stop_clipped\t+\t$sequence_name\n";
 					$BEDcontent_target.="$chr\t$start_clipped\t$stop_clipped\t+\t$sequence_name\t$primer1_sequence\t$primer2_sequence\t$chr:$start-$stop\n";
 				} elsif ($line_content  =~ /(.+)\t(\w+)\t(\d+)\t(\d+)/) { # in case of no primer defined
 					#print "!!!Match $1 $2 $3 $4\n" if $DEBUG;
 					my $sequence_name=$1;
 					my $chr=$2;
-					my $start=$3;
+					my $start=($3-1);
 					my $stop=$4;
 					#$BEDcontent.="$chr\t$start\t$start\t+\t$chr:$start-$stop\tForward\n";
 					#$BEDcontent.="$chr\t$stop\t$stop\t+\t$chr:$start-$stop\tReverse\n";
-					$BEDcontent_amplicon.="$chr\t$start\t$stop\t$sequence_name\t$sequence_name\n";
-					$BEDcontent_region.="$chr\t$start\t$stop\t$sequence_name\t$sequence_name\n";
-					$BEDcontent_region_clipped.="$chr\t$start\t$stop\t$sequence_name\t$sequence_name\n";
+					$BEDcontent_amplicon.="$chr\t$start\t$stop\t+\t$sequence_name\n";
+					$BEDcontent_region.="$chr\t$start\t$stop\t+\t$sequence_name\n";
+					$BEDcontent_region_clipped.="$chr\t$start\t$stop\t+\t$sequence_name\n";
 					$BEDcontent_target.="$chr\t$start\t$stop\t+\t$sequence_name\t$primer1_sequence\t$primer2_sequence\t$chr:$start-$stop\n";
 				};#if
 			};#if
@@ -609,7 +612,7 @@ if (uc($manifest_type) eq "TRUSEQ") {
 			#my $TargetRegionID=$amplicon_probes{$probeID}{"Target Region ID"};
 			my $TargetRegionID=$amplicon_probes{$probeID}{"Target ID"}.".".$amplicon_probes{$probeID}{"Target Region ID"};
 			#my $stop=$amplicon_probes{$probeID}{"End Position"};
-			my $start=$amplicon_targets{$probeID}{"Start Position"};
+			my $start=($amplicon_targets{$probeID}{"Start Position"}-1);
 			my $stop=$amplicon_targets{$probeID}{"End Position"};
 			my $probe_chr=$amplicon_targets{$probeID}{"Chromosome"};
 			my $probe_strand=$amplicon_probes{$probeID}{"Probe Strand"};
@@ -637,12 +640,12 @@ if (uc($manifest_type) eq "TRUSEQ") {
 				$primer1_sequence=$primer1_sequence_bis;
 				$primer2_sequence=$primer2_sequence_bis;
 			};#if
-			my $primer1_start=$start-1;
-			my $primer1_stop=$start+length($primer1_sequence)-1;
+			my $primer1_start=$start;
+			my $primer1_stop=$start+length($primer1_sequence);
 			my $primer2_start=($stop-length($primer2_sequence));
 			my $primer2_stop=$stop;
 			# clipping
-			my $start_clipped=($start+length($primer1_sequence));
+			my $start_clipped=($start+length($primer1_sequence)+1);
 			my $stop_clipped=($stop-length($primer2_sequence));
 			#} elsif ($probe_strand == "-") {
 			#	$primer1_start=$primer_start_position;
@@ -658,7 +661,7 @@ if (uc($manifest_type) eq "TRUSEQ") {
 		};#while
 		while ((my $regionID, my $regionInfo) = each(%regions)){
 			my $chr=$$regionInfo{"Chromosome"};
-			my $start=$$regionInfo{"Start Position"};
+			my $start=($$regionInfo{"Start Position"}-1);
 			my $stop=$$regionInfo{"End Position"};
 			#my $TargetRegionName=$$regionInfo{"Target Region Name"};
 			my $TargetRegionName=$$regionInfo{"Target Name"}.".".$$regionInfo{"Target Region ID"};

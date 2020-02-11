@@ -217,6 +217,7 @@ sub nb_i_cigar {
 		my $i=1;
 		foreach my $base (split(//,$CIGAR_expanded)) {
 			if ($base eq "I") {
+				#if ( (!defined $A_pos || $i>=$A_pos) && (!defined $B_pos || $i<=$B_pos) ) {
 				if ( (!defined $A_pos || $i>=$A_pos) && (!defined $B_pos || $i<=$B_pos) ) {
 					$nb_I++;
 					if (defined $B_pos) {
@@ -797,8 +798,10 @@ while ($h1 = <>) {
 					print "Pattern not well formated\n" if $DEBUG;
 					next;
 				};#if
-				my $pP1=$start+$lP1;
-				my $pP2=$stop-$lP2;
+				#my $pP1=$start+$lP1;
+				#my $pP2=$stop-$lP2;
+				my $pP1=$start+$lP1+1;
+				my $pP2=$stop-$lP2-1;
 				#next;
 
 				my $pos_i;
@@ -831,6 +834,7 @@ while ($h1 = <>) {
 
 
 					#my $pos_i;
+					#my $i=-1;
 					my $i=-1;
 					my $base_i;
 					my %nb_C;

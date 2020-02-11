@@ -10,13 +10,13 @@
 
 our %information = ( #
 	'script'	=>  	$0,		# Script
-	'release'	=>  	"0.9.1b",	# Release
+	'release'	=>  	"0.9.2b",	# Release
 	'description'	=>  	"Option from BED & FASTA",	# Description
 	#'beta'		=>  	"beta",		# Man parameter
-	'date'		=>  	"20160602",	# Release parameter
+	'date'		=>  	"20200206",	# Release parameter
 	'author'	=>  	"ALB",		# Debug parameter
 	'copyright'	=>  	"IRC",		# Verbose parameter
-	'licence'	=>  	"GNU-GPL",	# Licence
+	'licence'	=>  	"GNU-AGPL",	# Licence
 );
 
 
@@ -395,13 +395,32 @@ while(<FILE_INPUT>) {
 		#@myarray = ($line_content =~ m/(\w+)\t(\d+)\t(\d+)\t\+\t(.*)(.*)/g);
 		#print join(",", @myarray);
 		my $chr=$1;
-		my $start=$2;
+		#my $start=($2+1); # 1-based format
+		my $start=$2; # 1-based format
+		my $start_1_based=($2+1); # 1-based format
 		my $stop=$3;
+		my $stop_1_based=($3);
 		my $targetID=$line_content_split[4];
+		#my $targetID=$4;
+		#my $targetID="$chr:$start-$stop";
 		my $primerType=$line_content_split[5];
+		#my $primerType=$5;
 		print "$chr | $start | $stop | $targetID | $primerType\n" if $DEBUG;
 		#$primers{"$chr:$start-$stop"}{$primerType}="$chr:$start-$stop";
-		$targets{$targetID}{$primerType}="$chr:$start-$stop";
+		#$targets{$targetID}{$primerType}="$chr:$start-$stop";
+
+		#$targets{$targetID}{$primerType}="$chr:$start_1_based-$stop";
+		#$targets{$targetID}{"Region"}{"chr"}="$chr";
+		#$targets{$targetID}{"Region"}{$primerType}{"start"}="$start_1_based";
+		#$targets{$targetID}{"Region"}{$primerType}{"stop"}="$stop_1_based";
+
+		$targets{$targetID}{$primerType}="$chr:$start_1_based-$stop_1_based";
+		$targets{$targetID}{"primers"}{$primerType}{"length"}=($stop-$start);
+		$targets{$targetID}{"Region"}{"chr"}="$chr";
+		$targets{$targetID}{"Region"}{$primerType}{"start"}="$start_1_based";
+		$targets{$targetID}{"Region"}{$primerType}{"stop"}="$stop_1_based";
+
+		#$targets{$targetID}{$primerType}="$targetID";
 		# BED
 		#$BEDcontent.="$primer1_chr\t$primer1_start\t$primer1_stop\t+\t$chr:$start-$stop\tForward\n";
 		#$BEDcontent.="$primer2_chr\t$primer2_start\t$primer2_stop\t+\t$chr:$start-$stop\tReverse\n";
@@ -413,35 +432,37 @@ while(<FILE_INPUT>) {
 #read the file
 my $SEQ_NAME;
 my $SEQ;
-while(<FILE_FASTA>) {
+if (1) {
+	while(<FILE_FASTA>) {
 
-	# init
-	chomp; #delete \n character
-	my $line++;
-	my $line_content=$_;
+		# init
+		chomp; #delete \n character
+		my $line++;
+		my $line_content=$_;
 
-	# Null line
-	if (trim($line_content) eq "") {
-		next;
-	};
+		# Null line
+		if (trim($line_content) eq "") {
+			next;
+		};
 
-	my @line_content_split=split("\t",$line_content);
+		my @line_content_split=split("\t",$line_content);
 
-	# Process
-	#print "@line_content_split\n" if $DEBUG;
-	if ($line_content  =~ />(.*)/) {
-		#print "!!!Match SEQNAME $1\n" if $DEBUG;
-		$SEQ_NAME=$1;
-	} else {
-		if (defined $SEQ_NAME) {
-			$SEQ=uc($line_content);
-			$primers{$SEQ_NAME}=$SEQ;
-			#print "$SEQ_NAME=$SEQ\n" if $DEBUG;
+		# Process
+		#print "@line_content_split\n" if $DEBUG;
+		if ($line_content  =~ />(.*)/) {
+			#print "!!!Match SEQNAME $1\n" if $DEBUG;
+			$SEQ_NAME=$1;
+		} else {
+			if (defined $SEQ_NAME) {
+				$SEQ=uc($line_content);
+				$primers{$SEQ_NAME}=$SEQ;
+				#print "$SEQ_NAME=$SEQ\n" if $DEBUG;
+			};#if
 		};#if
-	};#if
 
 
-};#while
+	};#while
+};#if
 
 close(FILE_INPUT);
 close(FILE_FASTA);
@@ -452,7 +473,25 @@ print Dumper(\%primers) if $DEBUG;
 
 my $options;
 while ((my $targetID, my $primers_info) = each(%targets)){
-	$options.=$primers{$$primers_info{"Forward"}}.",".$primers{$$primers_info{"Reverse"}}.",$targetID;";
+	#$options.=$primers{$$primers_info{"Forward"}}.",".$primers{$$primers_info{"Reverse"}}.",$targetID;";
+	#$options.=$primers{$$primers_info{"Forward"}}.",".$primers{$$primers_info{"Reverse"}}.",".$$primers_info{"Region"}.";";
+	my $primerF=("N" x $$primers_info{"primers"}{"Forward"}{"length"});
+	if (defined $primers{$$primers_info{"Forward"}}) {
+		$primerF=$primers{$$primers_info{"Forward"}};
+	};#if
+	my $primerR=("N" x $$primers_info{"primers"}{"Reverse"}{"length"});
+	if (defined $primers{$$primers_info{"Reverse"}}) {
+		$primerR=$primers{$$primers_info{"Reverse"}};
+	};#if
+	$options.=$primerF.",".$primerR.",".$$primers_info{"Region"}{"chr"}.":".$$primers_info{"Region"}{"Forward"}{"start"}."-".$$primers_info{"Region"}{"Reverse"}{"stop"}.";";
+
+	#OK $options.=$primers{$$primers_info{"Forward"}}.",".$primers{$$primers_info{"Reverse"}}.",".$$primers_info{"Region"}{"chr"}.":".$$primers_info{"Region"}{"Forward"}{"start"}."-".$$primers_info{"Region"}{"Reverse"}{"stop"}.";";
+
+
+	#$options.="X,X,chr13:32890470-32890724;";
+
+
+	{"Region"}{$primerType}{"stop"}
 };#while
 
 
