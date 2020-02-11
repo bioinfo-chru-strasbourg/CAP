@@ -10,13 +10,13 @@
 
 our %information = ( #
 	'name'		=>  	"Clipping Amplicons' Primers",	# Name
-	'release'	=>  	"0.9.4.1b",	# Release
+	'release'	=>  	"0.9.5b",	# Release
 	'script'	=>  	basename($0),	# Script name
 	#'beta'		=>  	"beta",		#
-	'date'		=>  	"20160929",	# Date
+	'date'		=>  	"20200211",	# Date
 	'author'	=>  	"ALB",		# Author
 	'copyright'	=>  	"IRC",		# Copyright
-	'licence'	=>  	"GNUGPL",	# Licence
+	'licence'	=>  	"GNU-AGPL",	# Licence
 );
 
 our %realse_note = (

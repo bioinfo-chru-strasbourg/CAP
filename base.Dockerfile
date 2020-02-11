@@ -1,8 +1,8 @@
 
 ##############################################################
-# Dockerfile Version:   1.0
+# Dockerfile Version:   1.1
 # Software:             CAP
-# Software Version:     0.9.11b
+# Software Version:     0.9.12
 # Software Website:     none
 # Licence:              GNU Affero General Public License (AGPL)
 # Description:          CAP
@@ -41,7 +41,7 @@
 FROM centos
 MAINTAINER Antony Le Bechec <antony.lebechec@gmail.com>
 LABEL Software="CAP" \
-	Version="0.9.11b" \
+	Version="0.9.12" \
 	Website="none" \
 	Description="CAP" \
 	License="GNU Affero General Public License (AGPL)" \

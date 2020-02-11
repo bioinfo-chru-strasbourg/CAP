@@ -1,7 +1,7 @@
 #######################################
 # CAP [0.9.12-11/02/2020]
 # Clipping Amplicon Primers
-# Antony Le Bechec @ IRC © GNU-GPL
+# Antony Le Bechec @ IRC © GNU-AGPL
 #######################################
 
 CAP (Clipping Amplicon Primer) clips amplicon primers by identifying the most probable amplicon for each reads.

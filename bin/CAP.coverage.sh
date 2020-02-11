@@ -7,17 +7,19 @@
 
 SCRIPT_NAME="CAPCoverage"
 SCRIPT_DESCRIPTION="CAP coverage calculation on amplicons"
-SCRIPT_RELEASE="0.9.3b"
-SCRIPT_DATE="31/05/2018"
+SCRIPT_RELEASE="0.9.4b"
+SCRIPT_DATE="11/02/2020"
 SCRIPT_AUTHOR="Antony Le Bechec"
 SCRIPT_COPYRIGHT="IRC"
-SCRIPT_LICENCE="GNU-GPL"
+SCRIPT_LICENCE="GNU-AGPL"
 
 # Realse note
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9b-02/06/2016: Script creation\n";
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.1b-28/03/2017: Bug fixed on output if no primers defined\n";
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.2b-11/05/2017: Temporary files in a temporary folder. Bug fixed.\n";
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.3b-31/05/2017: Multithreading. Bug fixed.\n";
+RELEASE_NOTES=$RELEASE_NOTES"# 0.9.4b-11/02/2020: Switch to 0-based BED format.\n";
+
 
 
 # Header

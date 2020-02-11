@@ -10,10 +10,10 @@
 
 our %information = ( #
 	'script'	=>  	$0,		# Script
-	'release'	=>  	"0.9.11.1b",	# Release
+	'release'	=>  	"0.9.12b",	# Release
 	'description'	=>  	"BED File from Illumina Manifest",	# Description
 	#'beta'		=>  	"beta",		# Man parameter
-	'date'		=>  	"20200206",	# Release parameter
+	'date'		=>  	"20200211",	# Release parameter
 	'author'	=>  	"ALB",		# Debug parameter
 	'copyright'	=>  	"IRC",		# Verbose parameter
 	'licence'	=>  	"GNU-AGPL",	# Licence

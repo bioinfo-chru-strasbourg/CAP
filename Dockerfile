@@ -1,8 +1,8 @@
 
 ##############################################################
-# Dockerfile Version:   1.0
+# Dockerfile Version:   1.1
 # Software:             CAP
-# Software Version:     0.9.11b
+# Software Version:     0.9.12
 # Software Website:     none
 # Licence:              GNU Affero General Public License (AGPL)
 # Description:          CAP
@@ -41,7 +41,7 @@
 FROM centos
 MAINTAINER Antony Le Bechec <antony.lebechec@gmail.com>
 LABEL Software="CAP" \
-	Version="0.9.11b" \
+	Version="0.9.12" \
 	Website="none" \
 	Description="CAP" \
 	License="GNU Affero General Public License (AGPL)" \
@@ -171,8 +171,8 @@ RUN wget $JAR_LOCATION/$JAR ; \
 #######
 
 ENV TOOL_NAME=cap
-ENV TOOL_VERSION=0.9.11b
-ENV TARBALL_LOCATION=https://gitlab.bioinfo-diag.fr/Strasbourg/CAP/repository/0.9.11b
+ENV TOOL_VERSION=0.9.12
+ENV TARBALL_LOCATION=https://gitlab.bioinfo-diag.fr/Strasbourg/CAP/repository/0.9.12
 ENV TARBALL=archive.tar.gz
 ENV TARBALL_FOLDER=archive
 ENV DEST=$TOOLS/$TOOL_NAME/$TOOL_VERSION
