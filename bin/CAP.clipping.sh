@@ -516,7 +516,7 @@ if ((1)); then
 	(($DEBUG)) && cat $BEDTOOPTION_OUTPUT;
 	(($DEBUG)) && cat $BEDTOOPTION_ERR;
 	(($VERBOSE)) && echo "# BED_PRIMERS_OPTIONS=$BED_PRIMERS_OPTIONS"
-	(($DEBUG)) && head -c 200 $BED_PRIMERS_OPTIONS && echo "...";
+	(($DEBUG)) && head -n 10 -c 200 $BED_PRIMERS_OPTIONS && echo "...";
 
 fi;
 
