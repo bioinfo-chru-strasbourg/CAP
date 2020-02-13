@@ -515,12 +515,11 @@ if ((1)); then
 
 		#PARAM_CLIPPING=$PARAM
 		#PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--unclipped=.*[ |$]//g" | sed "s/-s=.*[ |$]//g" | sed "s/--threads .*[ |$]//g" | sed "s/-t .*[ |$]//g" | sed "s/--multithreading[ |$]//g" | sed "s/-x[ |$]//g")
-		PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--java=[^ |$]*//gi" | sed "s/-j=[^ |$]*//gi" | sed "s/--unclipped[^ |$]*//gi" | sed "s/-s[^ |$]*//gi")
-		#PARAM_MULTITHREADING=$(echo "$PARAM " | sed "s/--threads=[^ |$]*//gi" | sed "s/-t=[^ |$]*//gi" | sed "s/--multithreading[^ |$]*//gi" | sed "s/-x[^ |$]*//gi")
+		#PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--java=[^ |$]*//gi" | sed "s/-j=[^ |$]*//gi" | sed "s/--unclipped[^ |$]*//gi" | sed "s/-s[^ |$]*//gi")
+		#PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--java=[^ |$]*//gi" | sed "s/-j=[^ |$]*//gi" | sed "s/--unclipped[^ |$]*//gi" | sed "s/-s[^ |$]*//gi")
+		PARAM_CLIPPING=$PARAM
 
-		# -s|--unclipped)   -j|--java)
 
-		#echo -e "\n\n"
 		CLUSTERS_PATTERN_BAM=""
 		for CLUSTER in $(ls $CLUSTERS_PATTERN*); do
 
@@ -579,6 +578,7 @@ if ((1)); then
 
 				CLUSTERS_PATTERN_BAM=$CLUSTERS_PATTERN_BAM" $CLUSTER.manifest.bam"
 
+
 			fi;
 
 			if ((1)); then
@@ -589,11 +589,13 @@ if ((1)); then
 				PICARD_HSMETRICS_OUTPUT=$TMP_CAP/$RANDOM$RANDOM.HsMetrics;
 				TMP_FILES=$TMP_FILES" $CLUSTER_BED* $PICARD_HSMETRICS_OUTPUT*"
 				PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT=$PICARD_HSMETRICS_OUTPUT.PER_TARGET_COVERAGE;
-				PICARD_HSMETRICS_LOG=$PICARD_HSMETRICS_OUTPUT.lor;
+				PICARD_HSMETRICS_LOG=$PICARD_HSMETRICS_OUTPUT.log;
 				PICARD_HSMETRICS_ERR=$PICARD_HSMETRICS_OUTPUT.err;
 				TMP_FILES=$TMP_FILES" $CLUSTER_BED $PICARD_HSMETRICS_OUTPUT* $PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT"
 				$SAMTOOLS view -H $BAM > $CLUSTER_BED;
-				cat $CLUSTER | cut -f1-5 >> $CLUSTER_BED
+				#cat $CLUSTER | cut -f1-5 >> $CLUSTER_BED # 0-based format
+				awk -F"\t" '{print $1"\t"$2+1"\t"$3"\t"$4"\t"$5}' $CLUSTER >> $CLUSTER_BED # 1-based format
+
 				(($VERBOSE)) && echo "# CLUSTER=$CLUSTER"
 				(($DEBUG)) && grep ^@ -v $CLUSTER | head -n 10 && echo "...";
 				(($VERBOSE)) && echo "# CLUSTER_BED=$CLUSTER_BED"
@@ -618,7 +620,7 @@ if ((1)); then
 				else
 
 					$JAVA $JAVA_FLAGS -jar $PICARD CollectHsMetrics INPUT=$CLUSTER.manifest.bam OUTPUT=$PICARD_HSMETRICS_OUTPUT R=$REF BAIT_INTERVALS=$CLUSTER_BED TARGET_INTERVALS=$CLUSTER_BED PER_TARGET_COVERAGE=$PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT METRIC_ACCUMULATION_LEVEL=ALL_READS VALIDATION_STRINGENCY=LENIENT 1>$PICARD_HSMETRICS_LOG 2>$PICARD_HSMETRICS_ERR;
-		# OUTPUT
+					# OUTPUT
 					if ((1)); then
 						(($VERBOSE)) && echo "# PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT=$PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT"
 						#(($VERBOSE)) && cat $PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT | cut -f5,7,8
@@ -681,25 +683,30 @@ if ((1)); then
 		fi;
 
 
-
-
-
-
-		NB_READ_TOTAL=$($SAMTOOLS view $BAM -c)
-		NB_READ_EXTRACTED=$($SAMTOOLS view $CLUSTERS_PATTERN.merged.bam -c)
-		echo "# Total number of extracted Reads: $NB_READ_EXTRACTED out of $NB_READ_TOTAL ";
+		if [ -s $CLUSTERS_PATTERN.merged.bam ]; then
+			NB_READ_TOTAL=$($SAMTOOLS view $BAM -c)
+			NB_READ_EXTRACTED=$($SAMTOOLS view $CLUSTERS_PATTERN.merged.bam -c)
+			echo "# Total number of extracted Reads: $NB_READ_EXTRACTED out of $NB_READ_TOTAL ";
+		else
+			echo "#[ERROR] No clipped BAM file"
+			#exit 1
+		fi;
 
 		MK_PICARD_HSMETRICS_OUTPUT_LIST=$MK_PICARD_HSMETRICS_OUTPUT_LIST" $PICARD_HSMETRICS_OUTPUT "
 
 
 
 		# FINAL
-		if ((1)); then
+		#if ((1)); then
+		if [ -s $PICARD_HSMETRICS_PER_TARGET_COVERAGE_MERGE_OUTPUT ]; then
 			cat $PICARD_HSMETRICS_PER_TARGET_COVERAGE_HEADER_OUTPUT > $PICARD_HSMETRICS_PER_TARGET_COVERAGE_FINAL_OUTPUT
 			cat $PICARD_HSMETRICS_PER_TARGET_COVERAGE_MERGE_OUTPUT | sort -k1 -k2 >> $PICARD_HSMETRICS_PER_TARGET_COVERAGE_FINAL_OUTPUT
 			cp $PICARD_HSMETRICS_PER_TARGET_COVERAGE_FINAL_OUTPUT $OUTPUT
 			(($VERBOSE)) && echo "# OUTPUT=$OUTPUT"
 			(($DEBUG)) && column -t $OUTPUT  | head -n 10 #| cut -f5,7,8
+		else
+			echo "#[ERROR] No Output Metrics file"
+			exit 1
 		fi;
 
 		if ((1)); then
