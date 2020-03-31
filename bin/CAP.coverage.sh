@@ -7,8 +7,8 @@
 
 SCRIPT_NAME="CAPCoverage"
 SCRIPT_DESCRIPTION="CAP coverage calculation on amplicons"
-SCRIPT_RELEASE="0.9.4b"
-SCRIPT_DATE="11/02/2020"
+SCRIPT_RELEASE="0.9.5b"
+SCRIPT_DATE="31/03/2020"
 SCRIPT_AUTHOR="Antony Le Bechec"
 SCRIPT_COPYRIGHT="IRC"
 SCRIPT_LICENCE="GNU-AGPL"
@@ -19,6 +19,7 @@ RELEASE_NOTES=$RELEASE_NOTES"# 0.9.1b-28/03/2017: Bug fixed on output if no prim
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.2b-11/05/2017: Temporary files in a temporary folder. Bug fixed.\n";
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.3b-31/05/2017: Multithreading. Bug fixed.\n";
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.4b-11/02/2020: Switch to 0-based BED format.\n";
+RELEASE_NOTES=$RELEASE_NOTES"# 0.9.5b-31/03/2020: Add HsMetrics parameters.\n";
 
 
 
@@ -44,6 +45,7 @@ function usage {
 	echo "# -m/--manifest                 MANIFEST file (mandatory)";
 	echo "# -k/--unclipped                Indicates if the BAM file is NOT clipped (yet) (default: 0/FALSE, means that the BAM IS clipped)";
 	echo "# -g/--clip_overlapping_reads   Clip overlapping reads from PICARD.";
+	echo "# -f/--hsmetrics_parameters     Parameters for CollectHsMetrics PICARD. format='PARAM=VAL;PARAM=VAL...'";
 	echo "# -c/--chr                      Filter reads on chromosome (defaut all reads)";
 	echo "# -o/--output                   Coverage file from Aligned BAM file depending on Manifest (defaut BAM.coverage)";
 	echo "# -e/--env                      ENVironment file";
@@ -66,7 +68,7 @@ function usage {
 header;
 
 #ARGS=$(getopt -o "f:b:m:kgo:c:e:r:p:i:s:u:j:t:u:xvdrh" --long "function:,bam:,manifest:,unclipped,clip_overlapping_reads,output:,chr:,env:,ref::,picard:,samtools:,bedtools:,java:,tmp:,threads:,multithreading,verbose,debug,release,help" -- "$@" 2> /dev/null)
-ARGS=$(getopt -o "f:b:m:o:r:e:kgc:q:a:t:u:z:p:s:l:j:vdnh" --long "function:,bam:,manifest:,output:,ref:,env:,unclipped,clip_overlapping_reads,chr:,clipping_mode:,clipping_options:,tmp:,threads:,compress:,picard:,samtools:,bedtools:,java:,verbose,debug,release,help" -- "$@" 2> /dev/null)
+ARGS=$(getopt -o "f:b:m:o:r:e:kgf:c:q:a:t:u:z:p:s:l:j:vdnh" --long "function:,bam:,manifest:,output:,ref:,env:,unclipped,clip_overlapping_reads,hsmetrics_parameters:,chr:,clipping_mode:,clipping_options:,tmp:,threads:,compress:,picard:,samtools:,bedtools:,java:,verbose,debug,release,help" -- "$@" 2> /dev/null)
 
 if [ $? -ne 0 ]; then
 	echo $?
@@ -124,6 +126,10 @@ do
 		-g|--clip_overlapping_reads)
 			CLIP_OVERLAPPING_READS=1;
 			shift 1
+			;;
+		-f|--hsmetrics_parameters)
+			HSMETRICS_PARAMETERS=$(echo "$2" | tr ";" " ")
+			shift 2
 			;;
 		-c|--chr)
 			CHR="$2"
@@ -355,6 +361,7 @@ echo "#[INFO] REF=$REF"
 echo "#[INFO] ENV=$ENV"
 echo "#[INFO] UNCLIPPED=$CLIPPED_BAM"
 echo "#[INFO] CLIP_OVERLAPPING_READS=$CLIP_OVERLAPPING_READS"
+echo "#[INFO] HSMETRICS_PARAMETERS=$HSMETRICS_PARAMETERS"
 echo "#[INFO] CHR=$CHR"
 echo "#[INFO] CLIPPING_OPTIONS=$CLIPPING_OPTIONS"
 echo "#[INFO] CLIPPING_MODE=$CLIPPING_MODE"
@@ -517,7 +524,8 @@ if ((1)); then
 		#PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--unclipped=.*[ |$]//g" | sed "s/-s=.*[ |$]//g" | sed "s/--threads .*[ |$]//g" | sed "s/-t .*[ |$]//g" | sed "s/--multithreading[ |$]//g" | sed "s/-x[ |$]//g")
 		#PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--java=[^ |$]*//gi" | sed "s/-j=[^ |$]*//gi" | sed "s/--unclipped[^ |$]*//gi" | sed "s/-s[^ |$]*//gi")
 		#PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--java=[^ |$]*//gi" | sed "s/-j=[^ |$]*//gi" | sed "s/--unclipped[^ |$]*//gi" | sed "s/-s[^ |$]*//gi")
-		PARAM_CLIPPING=$PARAM
+		#PARAM_CLIPPING=$PARAM
+		PARAM_CLIPPING=$(echo "$PARAM " | sed "s/--hsmetrics_parameters=[^ |$]*//gi" | sed "s/-f=[^ |$]*//gi" | sed "s/--java=[^ |$]*//gi" | sed "s/-j=[^ |$]*//gi" | sed "s/--unclipped[^ |$]*//gi" )
 
 
 		CLUSTERS_PATTERN_BAM=""
@@ -609,7 +617,7 @@ if ((1)); then
 
 					# MULTITHREADING
 					echo "$PICARD_HSMETRICS_OUTPUT: $CLUSTER.manifest.bam
-					$JAVA $JAVA_FLAGS -jar $PICARD CollectHsMetrics INPUT=$CLUSTER.manifest.bam OUTPUT=$PICARD_HSMETRICS_OUTPUT R=$REF BAIT_INTERVALS=$CLUSTER_BED TARGET_INTERVALS=$CLUSTER_BED PER_TARGET_COVERAGE=$PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT METRIC_ACCUMULATION_LEVEL=ALL_READS VALIDATION_STRINGENCY=LENIENT CLIP_OVERLAPPING_READS=$(if (( $CLIP_OVERLAPPING_READS )); then echo "true"; else echo "false"; fi) 1>$PICARD_HSMETRICS_LOG 2>$PICARD_HSMETRICS_ERR
+					$JAVA $JAVA_FLAGS -jar $PICARD CollectHsMetrics INPUT=$CLUSTER.manifest.bam OUTPUT=$PICARD_HSMETRICS_OUTPUT R=$REF BAIT_INTERVALS=$CLUSTER_BED TARGET_INTERVALS=$CLUSTER_BED PER_TARGET_COVERAGE=$PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT METRIC_ACCUMULATION_LEVEL=ALL_READS VALIDATION_STRINGENCY=LENIENT CLIP_OVERLAPPING_READS=$(if (( $CLIP_OVERLAPPING_READS )); then echo "true"; else echo "false"; fi) $HSMETRICS_PARAMETERS 1>$PICARD_HSMETRICS_LOG 2>$PICARD_HSMETRICS_ERR
 					head -n 1 $PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT > $PICARD_HSMETRICS_PER_TARGET_COVERAGE_HEADER_OUTPUT
 					sed 1d $PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT >> $PICARD_HSMETRICS_PER_TARGET_COVERAGE_MERGE_OUTPUT
 
@@ -619,7 +627,7 @@ if ((1)); then
 
 				else
 
-					$JAVA $JAVA_FLAGS -jar $PICARD CollectHsMetrics INPUT=$CLUSTER.manifest.bam OUTPUT=$PICARD_HSMETRICS_OUTPUT R=$REF BAIT_INTERVALS=$CLUSTER_BED TARGET_INTERVALS=$CLUSTER_BED PER_TARGET_COVERAGE=$PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT METRIC_ACCUMULATION_LEVEL=ALL_READS VALIDATION_STRINGENCY=LENIENT 1>$PICARD_HSMETRICS_LOG 2>$PICARD_HSMETRICS_ERR;
+					$JAVA $JAVA_FLAGS -jar $PICARD CollectHsMetrics INPUT=$CLUSTER.manifest.bam OUTPUT=$PICARD_HSMETRICS_OUTPUT R=$REF BAIT_INTERVALS=$CLUSTER_BED TARGET_INTERVALS=$CLUSTER_BED PER_TARGET_COVERAGE=$PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT METRIC_ACCUMULATION_LEVEL=ALL_READS VALIDATION_STRINGENCY=LENIENT CLIP_OVERLAPPING_READS=$(if (( $CLIP_OVERLAPPING_READS )); then echo "true"; else echo "false"; fi) $HSMETRICS_PARAMETERS 1>$PICARD_HSMETRICS_LOG 2>$PICARD_HSMETRICS_ERR;
 					# OUTPUT
 					if ((1)); then
 						(($VERBOSE)) && echo "# PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT=$PICARD_HSMETRICS_PER_TARGET_COVERAGE_OUTPUT"

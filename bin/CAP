@@ -48,6 +48,7 @@ function usage {
 	echo "# -e/--env                      ENVironment file";
 	echo "# -k/--unclipped                Indicates if the BAM file is NOT clipped (yet) (default: 0/FALSE, means that the BAM IS clipped)";
 	echo "# -g/--clip_overlapping_reads   Clip overlapping reads from PICARD.";
+	echo "# -f/--hsmetrics_parameters     Parameters for CollectHsMetrics PICARD. format='PARAM=VAL;PARAM=VAL...'";
 	echo "# -c/--chr                      Filter reads on chromosome (defaut all reads)";
 	echo "# -q/--clipping_mode            Clipping mode, either 'O' for SoftClipping or 'Q' for SoftClipping and Q0 (default 'O')";
 	echo "# -a/--clipping_options         Clipping options";
@@ -73,7 +74,7 @@ function usage {
 # header
 header;
 
-ARGS=$(getopt -o "f:b:m:o:r:e:kgc:q:a:t:u:z:p:s:l:j:vdnh" --long "function:,bam:,manifest:,output:,ref:,env:,unclipped,clip_overlapping_reads,chr:,clipping_mode:,clipping_options:,tmp:,threads:,compress:,picard:,samtools:,bedtools:,java:,verbose,debug,release,help" -- "$@" 2> /dev/null)
+ARGS=$(getopt -o "f:b:m:o:r:e:kgc:q:a:t:u:z:p:s:l:j:vdnh" --long "function:,bam:,manifest:,output:,ref:,env:,unclipped,clip_overlapping_reads,hsmetrics_parameters:,chr:,clipping_mode:,clipping_options:,tmp:,threads:,compress:,picard:,samtools:,bedtools:,java:,verbose,debug,release,help" -- "$@" 2> /dev/null)
 
 
 
@@ -136,6 +137,10 @@ do
 		-g|--clip_overlapping_reads)
 			CLIP_OVERLAPPING_READS=1;
 			shift 1
+			;;
+		-f|--hsmetrics_parameters)
+			HSMETRICS_PARAMETERS=$(echo "$2" | tr ";" " ")
+			shift 2
 			;;
 		-c|--chr)
 			CHR="$2"

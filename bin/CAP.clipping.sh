@@ -65,7 +65,7 @@ function usage {
 header;
 
 #ARGS=$(getopt -o "f:b:m:o:q:c:a:e:r:p:s:l:t:u:z:xvdnh" --long "function:,bam:,manifest:,output:,chr:,clipping_mode:,clipping_options:,clip_overlapping_reads,env:,ref:,picardlib:,samtools:,bedtools:,tmp:,threads:,compress:,multithreading,verbose,debug,release,help" -- "$@" 2> /dev/null)
-ARGS=$(getopt -o "f:b:m:o:r:e:kgc:q:a:t:u:z:p:s:l:j:vdnh" --long "function:,bam:,manifest:,output:,ref:,env:,unclipped,clip_overlapping_reads,chr:,clipping_mode:,clipping_options:,tmp:,threads:,compress:,picard:,samtools:,bedtools:,java:,verbose,debug,release,help" -- "$@" 2> /dev/null)
+ARGS=$(getopt -o "f:b:m:o:r:e:kgf:c:q:a:t:u:z:p:s:l:j:vdnh" --long "function:,bam:,manifest:,output:,ref:,env:,unclipped,clip_overlapping_reads,hsmetrics_parameters:,chr:,clipping_mode:,clipping_options:,tmp:,threads:,compress:,picard:,samtools:,bedtools:,java:,verbose,debug,release,help" -- "$@" 2> /dev/null)
 if [ $? -ne 0 ]; then
 	echo $?
 	usage;
@@ -122,6 +122,10 @@ do
 		-g|--clip_overlapping_reads)
 			CLIP_OVERLAPPING_READS=1;
 			shift 1
+			;;
+		-f|--hsmetrics_parameters)
+			HSMETRICS_PARAMETERS=$(echo "$2" | tr ";" " ")
+			shift 2
 			;;
 		-c|--chr)
 			CHR="$2"
