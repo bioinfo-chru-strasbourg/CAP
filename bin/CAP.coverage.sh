@@ -7,7 +7,7 @@
 
 SCRIPT_NAME="CAPCoverage"
 SCRIPT_DESCRIPTION="CAP coverage calculation on amplicons"
-SCRIPT_RELEASE="0.9.5b"
+SCRIPT_RELEASE="0.9.6b"
 SCRIPT_DATE="31/03/2020"
 SCRIPT_AUTHOR="Antony Le Bechec"
 SCRIPT_COPYRIGHT="HUS/CPS"
@@ -20,6 +20,7 @@ RELEASE_NOTES=$RELEASE_NOTES"# 0.9.2b-11/05/2017: Temporary files in a temporary
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.3b-31/05/2017: Multithreading. Bug fixed.\n";
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.4b-11/02/2020: Switch to 0-based BED format.\n";
 RELEASE_NOTES=$RELEASE_NOTES"# 0.9.5b-31/03/2020: Add HsMetrics parameters.\n";
+RELEASE_NOTES=$RELEASE_NOTES"# 0.9.6b-02/02/2021: Manifest well-formed format.\n";
 
 
 
@@ -546,19 +547,14 @@ if ((1)); then
 				AMPLICON_BAM_PATTERN=$CLUSTER.amplicon_
 
 				# Manifest
-				#echo "[Regions]" > $CLUSTER.manifest
+				echo "[Regions]" > $CLUSTER.manifest
 				#echo "Name	Chromosome	Amplicon Start	Amplicon End	Upstream Probe Length	Downstream Probe Length" >> $CLUSTER.manifest
-				#cat $CLUSTER | awk '{print $5"\t"$1"\t"$2"\t"$3"\t"length($6)"\t"length($7)}' >> $CLUSTER.manifest
-
+				echo "Name	Chromosome	Start	Stop	Upstream Probe Length	Downstream Probe Length" >> $CLUSTER.manifest
 				if (($CLIPPED_BAM)); then
 					(($VERBOSE)) && echo -e "\n# BAM clipped..."
-					echo "[Regions]" > $CLUSTER.manifest
-					echo "Name	Chromosome	Amplicon Start	Amplicon End	Upstream Probe Length	Downstream Probe Length" >> $CLUSTER.manifest
 					cat $CLUSTER | awk '{print $5"\t"$1"\t"$2"\t"$3"\t1\t1"}' >> $CLUSTER.manifest
 				else
 					(($VERBOSE)) && echo -e "\n# BAM unclipped..."
-					echo "[Regions]" > $CLUSTER.manifest
-					echo "Name	Chromosome	Amplicon Start	Amplicon End	Upstream Probe Length	Downstream Probe Length" >> $CLUSTER.manifest
 					cat $CLUSTER | awk '{print $5"\t"$1"\t"$2-length($6)"\t"$3+length($7)"\t"length($6)"\t"length($7)}' >> $CLUSTER.manifest
 				fi;
 

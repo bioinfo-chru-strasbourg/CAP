@@ -10,13 +10,13 @@
 
 our %information = ( #
 	'script'	=>  	$0,		# Script
-	'release'	=>  	"0.9.12b",	# Release
+	'release'	=>  	"0.9.13b",	# Release
 	'description'	=>  	"BED File from Illumina Manifest",	# Description
 	#'beta'		=>  	"beta",		# Man parameter
-	'date'		=>  	"20200211",	# Release parameter
+	'date'		=>  	"20210202",	# Release parameter
 	'author'	=>  	"ALB",		# Debug parameter
 	'copyright'	=>  	"IRC",		# Verbose parameter
-	'licence'	=>  	"GNU-AGPL",	# Licence
+	'licence'	=>  	"GNU-AGPL-V3",	# Licence
 );
 
 
@@ -371,11 +371,13 @@ sub manifest_type_test {
 		$line_content=$_;
 
 		## PCR
-		if ($line_content =~ /Name	Chromosome	Amplicon Start	Amplicon End	Upstream Probe Length	Downstream Probe Length/) {
+		if ($line_content =~ /Name	Chromosome	Amplicon Start	Amplicon End	Upstream Probe Length	Downstream Probe Length/
+		|| $line_content =~ /Name	Chromosome	Start	Stop	Upstream Probe Length	Downstream Probe Length/) {
 			$manifest_type="PCR";
 		};#if
 		## PCR light
-		if ($line_content =~ /Name	Chromosome	Amplicon Start	Amplicon End/) {
+		if ($line_content =~ /Name	Chromosome	Amplicon Start	Amplicon End/
+		|| $line_content =~ /Name	Chromosome	Start	Stop/) {
 			$manifest_type="PCR";
 		};#if
 
